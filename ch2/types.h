@@ -5,6 +5,8 @@ typedef struct Color {
 	uint8_t r, g, b;
 } Color;
 
+#define WHITE (Color){255, 255, 255}
+
 typedef struct Vec3 {
 	double x, y, z;
 } Vec3;
