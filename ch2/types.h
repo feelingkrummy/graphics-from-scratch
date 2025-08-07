@@ -1,15 +1,18 @@
 #ifndef _TYPES_H_
 #define _TYPES_H_
 
+#include "vec3.h"
+
 typedef struct Color {
 	uint8_t r, g, b;
 } Color;
 
 #define WHITE (Color){255, 255, 255}
 
-typedef struct Vec3 {
-	double x, y, z;
-} Vec3;
-typedef struct Vec3 Point;
+typedef struct Sphere {
+	Vec3 center;
+	double radius;
+	Color color;
+} Sphere;
 
 #endif
