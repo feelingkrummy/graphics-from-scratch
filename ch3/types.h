@@ -13,6 +13,7 @@ typedef struct Sphere {
 	Vec3 center;
 	double radius;
 	Color color;
+	double specular;
 } Sphere;
 
 #endif

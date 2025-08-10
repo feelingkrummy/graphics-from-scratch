@@ -14,22 +14,26 @@ const Sphere spheres[] = {
 	{
 		.center = {0, -1, 3},
 		.radius = 1,
-		.color = {255, 0, 0}
+		.color = {255, 0, 0}, // Red
+		.specular = 500
 	},
 	{
 		.center = {2, 0, 4},
 		.radius = 1,
-		.color = {0, 0, 255}
+		.color = {0, 0, 255}, // Blue
+		.specular = 500
 	},
 	{
 		.center = {-2, 0, 4},
 		.radius = 1,
-		.color = {0, 255, 0}
+		.color = {0, 255, 0}, // Green
+		.specular = 10
 	},
 	{
 		.center = {0, -5001, 0},
 		.radius = 5000,
-		.color = {255, 255, 0}
+		.color = {255, 255, 0}, // Yellow
+		.specular = 1000
 	}
 };
 const uint64_t spheres_len = sizeof(spheres)/sizeof(Sphere);
@@ -51,6 +55,16 @@ const Light lights[] = {
 	}
 };
 const uint64_t lights_len = sizeof(lights)/sizeof(Light);
+
+double clamp(double val, double low, double high) {
+	if ( val < low ) {
+		return low;
+	}
+	if ( val > high ) {
+		return high;
+	}
+	return val;
+}
 
 Vec3 canvas_to_viewport(double x, double y) {
 	return (Vec3){
@@ -83,7 +97,7 @@ IntersectResult intersect_ray_sphere(Vec3 origin, Vec3 direction, Sphere s) {
 	};
 }
 
-double compute_lighting(Vec3 point, Vec3 norm) {
+double compute_lighting(Vec3 point, Vec3 norm, Vec3 view, double specular_exp) {
 	double intensity = 0.0;
 	Vec3 light_ray = {0};
 	for (int i = 0; i < lights_len; i += 1) {
@@ -98,10 +112,20 @@ double compute_lighting(Vec3 point, Vec3 norm) {
 				light_ray = light->direction;
 			}
 
+			// Diffuse
 			double norm_dot_light = vec3_dot(norm, light_ray);
 			if (norm_dot_light > 0) {
 				intensity += light->intensity *
 					(norm_dot_light/(vec3_len(norm) * vec3_len(light_ray)));
+			}
+
+			// Specular
+			if (specular_exp != -1.0) {
+				Vec3 R = vec3_sub(vec3_scale(norm, 2.0*norm_dot_light), light_ray);
+				double r_dot_v = vec3_dot(R, view);
+				if (r_dot_v > 0) {
+					intensity += light->intensity * pow(r_dot_v/(vec3_len(R) * vec3_len(view)), specular_exp);
+				}
 			}
 		}
 	}
@@ -132,10 +156,13 @@ Color trace_ray(Vec3 origin, Vec3 direction, double t_min, double t_max) {
 	Vec3 point = vec3_add(origin, vec3_scale(direction, closest_t));
 	Vec3 norm = vec3_sub(point, closest_sphere.center);
 	norm = vec3_scale(norm, 1.0/vec3_len(norm));
+
+	Vec3 view = vec3_scale(direction, -1);
+
 	return (Color){
-		.r = closest_sphere.color.r * compute_lighting(point, norm),
-		.g = closest_sphere.color.g * compute_lighting(point, norm),
-		.b = closest_sphere.color.b * compute_lighting(point, norm)
+		.r = clamp(closest_sphere.color.r * compute_lighting(point, norm, view, closest_sphere.specular), 0, 255),
+		.g = clamp(closest_sphere.color.g * compute_lighting(point, norm, view, closest_sphere.specular), 0, 255),
+		.b = clamp(closest_sphere.color.b * compute_lighting(point, norm, view, closest_sphere.specular), 0, 255)
 	};
 }
 
