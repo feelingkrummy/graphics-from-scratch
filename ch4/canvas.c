@@ -17,14 +17,6 @@ void put_pixel(int64_t c_x, int64_t c_y, Color col) {
 	}
 	s_x = C_W/2 + c_x;
 	s_y = C_H/2 - c_y - 1;
-	if ( !(s_x < 600 && s_y < 600) ) {
-		fprintf(stderr, "(%ld, %ld) => (%ld, %ld)\n", c_x, c_y, s_x, s_y);
-		assert(0);
-	}
-	if (c_y >= C_H/2-1 || s_y == 0 || s_y >= 599 ) {
-		fprintf(stderr, "(%ld, %ld) => (%ld, %ld) with {%d, %d, %d}\n", c_x, c_y, s_x, s_y,
-				col.r, col.g, col.b);
-	}
 	canvas[s_x][s_y] = col;
 	return;
 }
