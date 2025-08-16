@@ -3,6 +3,8 @@
 #include <math.h>
 #include <unistd.h>
 
+#include <assert.h>
+
 #include "types.h"
 #include "canvas.h"
 #include "light.h"
@@ -16,8 +18,15 @@ const Sphere spheres[] = {
 		.center = {0, -1, 3},
 		.radius = 1,
 		.color = {255, 0, 0}, // Red
-		.specular = 500,
+		.specular = 100,
 		.reflective = 0.2
+	},
+	{
+		.center = {0, 1, 6},
+		.radius = 1,
+		.color = {0, 255, 255}, // Cyan 
+		.specular = 500,
+		.reflective = 0.9
 	},
 	{
 		.center = {2, 0, 4},
@@ -73,8 +82,8 @@ double clamp(double val, double low, double high) {
 
 Vec3 canvas_to_viewport(double x, double y) {
 	return (Vec3){
-		.x = x*V_w/C_W,
-		.y = y*V_h/C_H,
+		.x = (x - C_W/2)*V_w/C_W,
+		.y = (-y + C_H/2)*V_h/C_W,
 		.z = proj_plane_d
 	};
 }
@@ -219,9 +228,9 @@ int main(void) {
 	printf("Sphere len : %d\n", spheres_len);
 	printf("Starting loop ... \n");
 
-	for (int64_t x = -C_W/2; x < C_W/2; x += 1) {
-		for (int64_t y = -C_H/2; y < C_H/2; y += 1) {
-			printf("Checking %6ld X %6ld ... \r", x, y);
+	for (int64_t y = 0; y < C_H; y++) {
+		for (int64_t x = 0; x < C_W; x++) {
+			printf("Tracing %6ld X %6ld ... \r", x, y);
 			Vec3 D = canvas_to_viewport(x, y);
 			Color col = trace_ray(origin, D, 1, INFINITY, 3);
 			put_pixel(x, y, col);
@@ -230,4 +239,5 @@ int main(void) {
 
 	printf("\nWriting to file ... \n");
 	draw_canvas("canvas.ppm");
+
 }
