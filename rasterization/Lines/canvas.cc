@@ -13,7 +13,7 @@ void put_pixel(int64_t canvas_x, int64_t canvas_y, Color c) {
 		return;
 	}
 	uint64_t screen_x = canvas_x + SCREEN_WIDTH/2;
-	uint64_t screen_y = SCREEN_HEIGHT - canvas_y - 1;
+	uint64_t screen_y = SCREEN_HEIGHT/2 - canvas_y - 1;
 	screen[screen_x][screen_y] = c;
 }
 
